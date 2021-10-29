@@ -1,9 +1,21 @@
-from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
-import numpy as np
-from random import random, seed
+
+
+def get_xy_grid_data(lower_bound, upper_bound, steps, flatten=False):
+
+    x = np.linspace(lower_bound, upper_bound, steps)
+    y = np.linspace(lower_bound, upper_bound, steps)
+    x, y = np.meshgrid(x,y)
+
+    if flatten:
+        x = x.flatten()
+        y = y.flatten()
+
+    return [x, y]
+
 
 def franke_function(x, y, noise_mean=0, noise_std=0):
     
@@ -21,8 +33,6 @@ def franke_function(x, y, noise_mean=0, noise_std=0):
     if noise_std > 0:
         epsilon = np.random.normal(0, noise_std, (len(x), len(x)))
         #epsilon = epsilon.reshape(len(x), len(x))
-
-        print(epsilon)
 
     # noise = np.random.normal(0, 0.1, len(x)*len(x)) 
     # noise = noise.reshape(len(x),len(x))
