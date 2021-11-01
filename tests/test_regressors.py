@@ -6,7 +6,7 @@ from parameterized import parameterized
 
 from src.tools import get_train_test_split, shuffle
 from src.franke_function import franke_function, get_xy_grid_data
-from src.regressors import ols, ridge
+from src.regressors import lasso, ols, ridge
 
 
 class TestOls(unittest.TestCase):
@@ -89,3 +89,40 @@ class TestOls(unittest.TestCase):
         # check equal
         for i in range(len(test_pred_skl)):
             self.assertAlmostEqual(test_pred_skl[i], test_pred_own[i])
+
+    @parameterized.expand([
+
+        [ 2, 0.5, True ], [ 3, 0.5, True ], [ 4, 0.5, True ], [ 5, 0.5, True ],
+        [ 2, 0.5, False ], [ 3, 0.5, False ], [ 4, 0.5, False ], [ 5, 0.5, False ]
+
+    ])
+    def test_lasso(self, n_pol, alpha, fit_intercept):
+
+        # build data
+        x, y = get_xy_grid_data(0, 1, 10)
+        data = { 'inputs': [x.flatten(), y.flatten()], 'targets': franke_function(x, y, noise_std=0).flatten()}
+        # shuffle
+        data = shuffle(data)
+        # split into train and test data
+        train_data, test_data = get_train_test_split(data, 0.8)
+
+        # get prediction from own implementation
+        train_pred_own, test_pred_own = lasso(train_data, test_data, n_pol, alpha=alpha, fit_intercept=fit_intercept)
+
+        # get reference prediction from sklearn
+        X = np.array(train_data['inputs']).T
+        vector = train_data['targets']
+        predict= np.array(test_data['inputs']).T
+
+        poly = PolynomialFeatures(degree=n_pol)
+        X_ = poly.fit_transform(X)
+        predict_ = poly.fit_transform(predict)
+
+        clf = linear_model.Lasso(alpha=alpha, fit_intercept=fit_intercept)
+        clf.fit(X_, vector)
+    
+        test_pred_skl = clf.predict(predict_)
+
+        # check equal
+        for i in range(len(test_pred_skl)):
+            self.assertAlmostEqual(test_pred_skl[i], test_pred_own[i], places=5)

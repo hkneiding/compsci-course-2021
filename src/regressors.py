@@ -1,8 +1,20 @@
 import itertools
 import numpy as np
+from scipy.optimize import minimize
 
 def calculate_beta(model_matrix, targets):
     return np.linalg.pinv(model_matrix.T @ model_matrix) @ model_matrix.T @ targets
+
+def lasso_error(beta, *args):
+
+    # args[0] = alpha
+    # args[1] = model_matrix
+    # args[2] = targets
+
+    return (1/(2 * args[2].shape[0])) * np.sum((args[2] - args[1] @ beta)**2) + args[0] * np.sum(np.abs(beta))
+
+def calculate_beta_lasso(model_matrix, targets, alpha):
+    return minimize(fun=lasso_error, x0=np.ones(model_matrix.shape[1]), args=(alpha, model_matrix, targets))['x']
 
 def calculate_beta_ridge(model_matrix, targets, alpha):
     return np.linalg.pinv(model_matrix.T @ model_matrix + alpha * np.eye(model_matrix.shape[1])) @ model_matrix.T @ targets
@@ -125,6 +137,43 @@ def ridge(train_data, test_data, n_pol, alpha, fit_intercept=True):
         train_model_matrix = get_model_matrix(train_data['inputs'], n_pol)
         # calculate beta
         beta = calculate_beta_ridge(train_model_matrix, train_data['targets'], alpha=alpha)
+        # get train prediction
+        train_prediction = get_prediction(train_model_matrix, beta)
+
+        # TEST
+        # set up model matrix for test
+        test_model_matrix = get_model_matrix(test_data['inputs'], n_pol)
+        # get test prediction
+        test_prediction = get_prediction(test_model_matrix, beta)
+
+    return train_prediction, test_prediction
+
+def lasso(train_data, test_data, n_pol, alpha, fit_intercept=True):
+
+    if fit_intercept:
+        # TRAIN
+        # set up model matrix for train
+        train_model_matrix = get_model_matrix(train_data['inputs'], n_pol, include_intercept=False)
+        # center model matrix
+        centered_train_model_matrix, train_mean, divisor_scaler = center(train_model_matrix)
+        # calculate beta
+        beta = calculate_beta_lasso(centered_train_model_matrix, train_data['targets'], alpha=alpha)
+        # get train prediction and account for intercept
+        train_prediction = get_prediction(centered_train_model_matrix, beta, intercept=np.mean(train_data['targets']))
+
+        # TEST
+        # set up model matrix for test
+        test_model_matrix = get_model_matrix(test_data['inputs'], n_pol, include_intercept=False)
+        # center model matrix according to train center
+        centered_test_model_matrix = (test_model_matrix - train_mean) / divisor_scaler
+        # get test prediction and account for intercept
+        test_prediction = get_prediction(centered_test_model_matrix, beta, intercept=np.mean(train_data['targets']))
+    else:
+        # TRAIN
+        # set up model matrix for train
+        train_model_matrix = get_model_matrix(train_data['inputs'], n_pol)
+        # calculate beta
+        beta = calculate_beta_lasso(train_model_matrix, train_data['targets'], alpha=alpha)
         # get train prediction
         train_prediction = get_prediction(train_model_matrix, beta)
 
