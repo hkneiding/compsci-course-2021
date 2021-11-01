@@ -6,8 +6,8 @@ from parameterized import parameterized
 
 from src.tools import get_train_test_split, shuffle
 from src.franke_function import franke_function, get_xy_grid_data
-from src.regressors import lasso, ols, ridge
-
+from src.regressors import regressor
+from src.enums.RegressorType import RegressorType
 
 class TestOls(unittest.TestCase):
 
@@ -19,10 +19,14 @@ class TestOls(unittest.TestCase):
 
     @parameterized.expand([
 
-        [ 1 ], [ 2 ], [ 3 ], [ 4 ], [ 5 ]
+        [ {'fit_intercept': True}, 1 ], 
+        [ {'fit_intercept': True}, 2 ], 
+        [ {'fit_intercept': True}, 3 ], 
+        [ {'fit_intercept': True}, 4 ], 
+        [ {'fit_intercept': True}, 5 ]
 
     ])
-    def test_ols(self, n_pol):
+    def test_ols(self, regressor_parameters, n_pol):
 
         # build data
         x, y = get_xy_grid_data(0, 1, 10)
@@ -33,7 +37,7 @@ class TestOls(unittest.TestCase):
         train_data, test_data = get_train_test_split(data, 0.8)
 
         # get prediction from own implementation
-        train_pred_own, test_pred_own = ols(train_data, test_data, n_pol, fit_intercept=True)
+        train_pred_own, test_pred_own = regressor(RegressorType.OLS, regressor_parameters, train_data, test_data, n_pol)
 
         # get reference prediction from sklearn
         X = np.array(train_data['inputs']).T
@@ -55,11 +59,20 @@ class TestOls(unittest.TestCase):
 
     @parameterized.expand([
 
-        [ 1, 0.5, True ], [ 2, 0.5, True ], [ 3, 0.5, True ], [ 4, 0.5, True ], [ 5, 0.5, True ],
-        [ 1, 0.5, False ], [ 2, 0.5, False ], [ 3, 0.5, False ], [ 4, 0.5, False ], [ 5, 0.5, False ]
+        [ { 'fit_intercept': False, 'alpha': 0.5 }, 1 ],
+        [ { 'fit_intercept': False, 'alpha': 0.5 }, 2 ],
+        [ { 'fit_intercept': False, 'alpha': 0.5 }, 3 ],
+        [ { 'fit_intercept': False, 'alpha': 0.5 }, 4 ],
+        [ { 'fit_intercept': False, 'alpha': 0.5 }, 5 ],
+
+        [ { 'fit_intercept': True, 'alpha': 0.5 }, 1 ],
+        [ { 'fit_intercept': True, 'alpha': 0.5 }, 2 ],
+        [ { 'fit_intercept': True, 'alpha': 0.5 }, 3 ],
+        [ { 'fit_intercept': True, 'alpha': 0.5 }, 4 ],
+        [ { 'fit_intercept': True, 'alpha': 0.5 }, 5 ]
 
     ])
-    def test_ridge(self, n_pol, alpha, fit_intercept):
+    def test_ridge(self, regressor_parameters, n_pol):
 
         # build data
         x, y = get_xy_grid_data(0, 1, 10)
@@ -70,7 +83,7 @@ class TestOls(unittest.TestCase):
         train_data, test_data = get_train_test_split(data, 0.8)
 
         # get prediction from own implementation
-        train_pred_own, test_pred_own = ridge(train_data, test_data, n_pol, alpha=alpha, fit_intercept=fit_intercept)
+        train_pred_own, test_pred_own = regressor(RegressorType.RIDGE, regressor_parameters, train_data, test_data, n_pol)
 
         # get reference prediction from sklearn
         X = np.array(train_data['inputs']).T
@@ -81,7 +94,7 @@ class TestOls(unittest.TestCase):
         X_ = poly.fit_transform(X)
         predict_ = poly.fit_transform(predict)
 
-        clf = linear_model.Ridge(alpha=alpha, fit_intercept=fit_intercept)
+        clf = linear_model.Ridge(alpha=regressor_parameters['alpha'], fit_intercept=regressor_parameters['fit_intercept'])
         clf.fit(X_, vector)
     
         test_pred_skl = clf.predict(predict_)
@@ -92,11 +105,18 @@ class TestOls(unittest.TestCase):
 
     @parameterized.expand([
 
-        [ 2, 0.5, True ], [ 3, 0.5, True ], [ 4, 0.5, True ], [ 5, 0.5, True ],
-        [ 2, 0.5, False ], [ 3, 0.5, False ], [ 4, 0.5, False ], [ 5, 0.5, False ]
+        [ { 'fit_intercept': False, 'alpha': 0.5 }, 2 ],
+        [ { 'fit_intercept': False, 'alpha': 0.5 }, 3 ],
+        [ { 'fit_intercept': False, 'alpha': 0.5 }, 4 ],
+        [ { 'fit_intercept': False, 'alpha': 0.5 }, 5 ],
+
+        [ { 'fit_intercept': True, 'alpha': 0.5 }, 2 ],
+        [ { 'fit_intercept': True, 'alpha': 0.5 }, 3 ],
+        [ { 'fit_intercept': True, 'alpha': 0.5 }, 4 ],
+        [ { 'fit_intercept': True, 'alpha': 0.5 }, 5 ]
 
     ])
-    def test_lasso(self, n_pol, alpha, fit_intercept):
+    def test_lasso(self, regressor_parameters, n_pol):
 
         # build data
         x, y = get_xy_grid_data(0, 1, 10)
@@ -107,7 +127,7 @@ class TestOls(unittest.TestCase):
         train_data, test_data = get_train_test_split(data, 0.8)
 
         # get prediction from own implementation
-        train_pred_own, test_pred_own = lasso(train_data, test_data, n_pol, alpha=alpha, fit_intercept=fit_intercept)
+        train_pred_own, test_pred_own = regressor(RegressorType.LASSO, regressor_parameters, train_data, test_data, n_pol)
 
         # get reference prediction from sklearn
         X = np.array(train_data['inputs']).T
@@ -118,7 +138,7 @@ class TestOls(unittest.TestCase):
         X_ = poly.fit_transform(X)
         predict_ = poly.fit_transform(predict)
 
-        clf = linear_model.Lasso(alpha=alpha, fit_intercept=fit_intercept)
+        clf = linear_model.Lasso(alpha=regressor_parameters['alpha'], fit_intercept=regressor_parameters['fit_intercept'])
         clf.fit(X_, vector)
     
         test_pred_skl = clf.predict(predict_)
