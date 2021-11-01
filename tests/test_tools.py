@@ -6,7 +6,6 @@ from parameterized import parameterized
 
 from src.tools import calculate_cost_mse, get_train_test_split, shuffle
 from src.franke_function import franke_function, get_xy_grid_data
-from src.ols import ols
 
 class TestTools(unittest.TestCase):
 

@@ -4,6 +4,9 @@ import numpy as np
 def calculate_beta(model_matrix, targets):
     return np.linalg.pinv(model_matrix.T @ model_matrix) @ model_matrix.T @ targets
 
+def calculate_beta_ridge(model_matrix, targets, alpha):
+    return np.linalg.pinv(model_matrix.T @ model_matrix + alpha * np.eye(model_matrix.shape[1])) @ model_matrix.T @ targets
+
 def get_prediction(model_matrix, beta, intercept=0):
     return model_matrix @ beta + intercept
 
@@ -84,6 +87,44 @@ def ols(train_data, test_data, n_pol, center_matrix=True):
         train_model_matrix = get_model_matrix(train_data['inputs'], n_pol)
         # calculate beta
         beta = calculate_beta(train_model_matrix, train_data['targets'])
+        # get train prediction
+        train_prediction = get_prediction(train_model_matrix, beta)
+
+        # TEST
+        # set up model matrix for test
+        test_model_matrix = get_model_matrix(test_data['inputs'], n_pol)
+        # get test prediction
+        test_prediction = get_prediction(test_model_matrix, beta)
+
+    return train_prediction, test_prediction
+
+
+def ridge(train_data, test_data, n_pol, alpha, center_matrix=True):
+
+    if center_matrix:
+        # TRAIN
+        # set up model matrix for train
+        train_model_matrix = get_model_matrix(train_data['inputs'], n_pol, include_intercept=False)
+        # center model matrix
+        centered_train_model_matrix, train_mean, divisor_scaler = center(train_model_matrix)
+        # calculate beta
+        beta = calculate_beta_ridge(centered_train_model_matrix, train_data['targets'], alpha=alpha)
+        # get train prediction and account for intercept
+        train_prediction = get_prediction(centered_train_model_matrix, beta, intercept=np.mean(train_data['targets']))
+
+        # TEST
+        # set up model matrix for test
+        test_model_matrix = get_model_matrix(test_data['inputs'], n_pol, include_intercept=False)
+        # center model matrix according to train center
+        centered_test_model_matrix = (test_model_matrix - train_mean) / divisor_scaler
+        # get test prediction and account for intercept
+        test_prediction = get_prediction(centered_test_model_matrix, beta, intercept=np.mean(train_data['targets']))
+    else:
+        # TRAIN
+        # set up model matrix for train
+        train_model_matrix = get_model_matrix(train_data['inputs'], n_pol)
+        # calculate beta
+        beta = calculate_beta_ridge(train_model_matrix, train_data['targets'], alpha=alpha)
         # get train prediction
         train_prediction = get_prediction(train_model_matrix, beta)
 

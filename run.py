@@ -2,7 +2,7 @@ import numpy as np
 
 from src.tools import bootstrap, cross_validation, get_train_test_split, shuffle
 from src.franke_function import franke_function, get_xy_grid_data
-from src.ols import ols
+from src.regressors import ols
 
 
 def main():
