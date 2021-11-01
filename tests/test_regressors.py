@@ -33,7 +33,7 @@ class TestOls(unittest.TestCase):
         train_data, test_data = get_train_test_split(data, 0.8)
 
         # get prediction from own implementation
-        train_pred_own, test_pred_own = ols(train_data, test_data, n_pol, center_matrix=True)
+        train_pred_own, test_pred_own = ols(train_data, test_data, n_pol, fit_intercept=True)
 
         # get reference prediction from sklearn
         X = np.array(train_data['inputs']).T
@@ -70,7 +70,7 @@ class TestOls(unittest.TestCase):
         train_data, test_data = get_train_test_split(data, 0.8)
 
         # get prediction from own implementation
-        train_pred_own, test_pred_own = ridge(train_data, test_data, n_pol, alpha=alpha, center_matrix=fit_intercept)
+        train_pred_own, test_pred_own = ridge(train_data, test_data, n_pol, alpha=alpha, fit_intercept=fit_intercept)
 
         # get reference prediction from sklearn
         X = np.array(train_data['inputs']).T

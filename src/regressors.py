@@ -61,9 +61,9 @@ def center(matrix):
     
     return matrix, m_mean, divisor
 
-def ols(train_data, test_data, n_pol, center_matrix=True):
+def ols(train_data, test_data, n_pol, fit_intercept=True):
 
-    if center_matrix:
+    if fit_intercept:
         # TRAIN
         # set up model matrix for train
         train_model_matrix = get_model_matrix(train_data['inputs'], n_pol, include_intercept=False)
@@ -99,9 +99,9 @@ def ols(train_data, test_data, n_pol, center_matrix=True):
     return train_prediction, test_prediction
 
 
-def ridge(train_data, test_data, n_pol, alpha, center_matrix=True):
+def ridge(train_data, test_data, n_pol, alpha, fit_intercept=True):
 
-    if center_matrix:
+    if fit_intercept:
         # TRAIN
         # set up model matrix for train
         train_model_matrix = get_model_matrix(train_data['inputs'], n_pol, include_intercept=False)
