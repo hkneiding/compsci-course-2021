@@ -16,7 +16,6 @@ def get_xy_grid_data(lower_bound, upper_bound, steps, flatten=False):
 
     return [x, y]
 
-
 def franke_function(x, y, noise_mean=0, noise_std=0):
     
     # assert same shape of input
