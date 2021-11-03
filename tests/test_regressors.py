@@ -7,13 +7,13 @@ from parameterized import parameterized
 from src.tools import get_train_test_split, shuffle
 from src.franke_function import franke_function, get_xy_grid_data
 from src.regressors import regressor
-from src.enums.RegressorType import RegressorType
+from src.enums.regressor_type import RegressorType
 
 class TestOls(unittest.TestCase):
 
     def setUp(self) -> None:
         # set random seed for reproducibility
-        np.random.seed(11111)
+        np.random.seed(1)
     
         return super().setUp()
 

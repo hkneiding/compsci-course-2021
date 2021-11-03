@@ -2,7 +2,7 @@ import itertools
 import numpy as np
 from scipy.optimize import minimize
 
-from .enums.RegressorType import RegressorType
+from .enums.regressor_type import RegressorType
 
 
 def calculate_beta(model_matrix, targets):
@@ -119,3 +119,14 @@ def regressor(type, regressor_parameters, train_data, test_data, n_pol):
         test_prediction = get_prediction(test_model_matrix, beta)
 
     return train_prediction, test_prediction
+
+# shorthands to regressor functions
+
+def ols(regressor_parameters, train_data, test_data, n_pol):
+    return regressor(RegressorType.OLS, regressor_parameters, train_data, test_data, n_pol)
+
+def lasso(regressor_parameters, train_data, test_data, n_pol):
+    return regressor(RegressorType.LASSO, regressor_parameters, train_data, test_data, n_pol)
+
+def ridge(regressor_parameters, train_data, test_data, n_pol):
+    return regressor(RegressorType.RIDGE, regressor_parameters, train_data, test_data, n_pol)

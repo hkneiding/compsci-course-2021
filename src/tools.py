@@ -54,7 +54,7 @@ def get_bootstrap_sample(data):
 
     return bootstrap_sample_data
 
-def bootstrap(data, regressor, n_pol, n_samples, train_ratio=0.8, center_matrix=True):
+def bootstrap(data, regressor, regressor_parameters, n_pol, n_samples, train_ratio=0.8):
 
     # lists to store output
     train_losses = []
@@ -69,13 +69,13 @@ def bootstrap(data, regressor, n_pol, n_samples, train_ratio=0.8, center_matrix=
         train_data, test_data = get_train_test_split(bootstrap_sample_data, train_ratio=train_ratio)
 
         # perform regression and append to output variables
-        train_prediction, test_prediction = regressor(train_data, test_data, n_pol, center_matrix=center_matrix)
+        train_prediction, test_prediction = regressor(regressor_parameters, train_data, test_data, n_pol)
         train_losses.append(calculate_cost_mse(train_prediction, train_data['targets']))
         test_losses.append(calculate_cost_mse(test_prediction, test_data['targets']))
 
     return train_losses, test_losses
 
-def cross_validation(data, regressor, n_pol, n_folds, center_matrix=True):
+def cross_validation(data, regressor, regressor_parameters, n_pol, n_folds):
 
     # check that data can be partioned into n_folds folds
     assert len(data['targets']) % n_folds == 0
@@ -95,7 +95,7 @@ def cross_validation(data, regressor, n_pol, n_folds, center_matrix=True):
         train_data = { 'inputs': [np.delete(item, test_indices) for item in data['inputs']], 'targets': np.delete(data['targets'], test_indices) }
 
         # perform regression and append to output variables
-        train_prediction, test_prediction = regressor(train_data, test_data, n_pol, center_matrix=center_matrix)
+        train_prediction, test_prediction = regressor(regressor_parameters, train_data, test_data, n_pol)
         train_losses.append(calculate_cost_mse(train_prediction, train_data['targets']))
         test_losses.append(calculate_cost_mse(test_prediction, test_data['targets']))
 
