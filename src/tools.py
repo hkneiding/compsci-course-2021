@@ -12,6 +12,10 @@ def calculate_cost_mse(predictions, targets):
 
     return np.mean(np.power(predictions - targets, 2))
 
+def calculate_cost_derivative_mse(X, Y, beta):
+
+    return (X @ beta.T - Y).T @ X
+
 def shuffle(data):
 
     # check that dimensions of inputs and targets match
@@ -100,3 +104,24 @@ def cross_validation(data, regressor, regressor_parameters, n_pol, n_folds):
         test_losses.append(calculate_cost_mse(test_prediction, test_data['targets']))
 
     return train_losses, test_losses
+
+def get_batches(model_matrix, targets, batch_size):
+
+    # shuffle data
+    perm = np.random.permutation(len(targets))
+
+    model_matrix = model_matrix[perm]
+    targets = targets[perm]
+
+    n_batches = int(np.ceil(len(targets) / batch_size))
+
+    model_matrix_batches = []
+    targets_batches =[]
+
+    running_index = 0
+    for i in range(n_batches):
+
+        model_matrix_batches.append(model_matrix[running_index:running_index + batch_size])
+        targets_batches.append(targets[running_index:running_index + batch_size])
+
+    return model_matrix_batches, targets_batches

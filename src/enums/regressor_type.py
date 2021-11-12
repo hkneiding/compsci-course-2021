@@ -6,6 +6,9 @@ class RegressorType(Enum):
     '''Enum class for regressor types'''
 
     OLS = auto()
-    LASSO = auto()
-    RIDGE = auto()
+    OLS_SGD = auto()
 
+    LASSO = auto()
+    
+    RIDGE = auto()
+    RIDGE_SGD = auto()
