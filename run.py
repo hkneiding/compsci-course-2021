@@ -1,11 +1,11 @@
 import numpy as np
-
-from src.tools import bootstrap, calculate_cost_derivative_mse, calculate_cost_mse, cross_validation, get_train_test_split, shuffle
-from src.franke_function import franke_function, get_xy_grid_data
-from src.regressors import lasso, ols, ols_sgd, regressor, ridge
-from src.sgd import gradient_descent, stochastic_gradient_descent
-
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+
+from src.tools import bootstrap, calculate_cost_mse, cross_validation, get_train_test_split, shuffle
+from src.franke_function import franke_function, get_xy_grid_data
+from src.regressors import lasso, ols, ols_sgd, regressor, ridge, ridge_sgd
+
 
 def main():
 
@@ -21,7 +21,7 @@ def main():
     # np.random.seed(1)
 
     # get grid points
-    x, y = get_xy_grid_data(0, 1, 50)
+    x, y = get_xy_grid_data(0, 1, 60)
 
     # full data object
     data = { 'inputs': [x.flatten(), y.flatten()], 'targets': franke_function(x, y, noise_std=0).flatten()}
@@ -40,9 +40,9 @@ def main():
 
 
         regressor_parameters = { 'fit_intercept': True, 
-                                 'alpha': 0.5,
-                                 'learning_rate': 0.001,
-                                 'max_iterations': 10000,
+                                 'alpha': 0.1,
+                                 'learning_rate': 0.1,
+                                 'max_iterations': 1000,
                                  'momentum': 0,
                                  'batch_size': 100
                                }
@@ -56,8 +56,8 @@ def main():
         # pol_test_loss.append(test_loss)
         
         
-        train_losses, test_losses = cross_validation(data, regressor=ols_sgd, regressor_parameters=regressor_parameters, n_pol=i, n_folds=4)
-        # train_losses, test_losses = bootstrap(data, regressor=ridge, regressor_parameters=regressor_parameters, n_pol=i, n_samples=10)
+        train_losses, test_losses = cross_validation(data, regressor=ridge, regressor_parameters=regressor_parameters, n_pol=i, n_folds=10)
+        # train_losses, test_losses = bootstrap(data, regressor=lasso, regressor_parameters=regressor_parameters, n_pol=i, n_samples=30)
 
 
         pol_train_loss.append(np.mean(train_losses))
@@ -72,9 +72,12 @@ def main():
 
 
     print(pol_train_loss)
-    plt.plot(n_pols, pol_train_loss, label='train')
-    plt.plot(n_pols, pol_test_loss, label='test')
-    plt.legend(loc='upper center')
+    plt.plot(n_pols, pol_train_loss, label='Train error')
+    plt.plot(n_pols, pol_test_loss, label='Test error')
+    plt.legend(loc='upper right')
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+    plt.ylabel('Cost')
+    plt.xlabel('Polynomial order')
     plt.show()
 
     exit()

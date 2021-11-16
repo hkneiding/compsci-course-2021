@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 
 from .enums.regressor_type import RegressorType
 from .sgd import stochastic_gradient_descent
-from .tools import calculate_cost_derivative_mse
+from .tools import calculate_cost_derivative_mse, calculate_cost_derivative_ridge
 
 def calculate_beta(model_matrix, targets):
     return np.linalg.pinv(model_matrix.T @ model_matrix) @ model_matrix.T @ targets
@@ -90,6 +90,15 @@ def get_beta(type, model_matrix, targets, regressor_parameters):
         return calculate_beta_lasso(model_matrix, targets, alpha=regressor_parameters['alpha'])
     elif type == RegressorType.RIDGE:
         return calculate_beta_ridge(model_matrix, targets, alpha=regressor_parameters['alpha'])
+    elif type == RegressorType.RIDGE_SGD:
+        # randomly generate first beta
+        beta = np.random.normal(size = model_matrix.shape[1])
+        return stochastic_gradient_descent(model_matrix, targets, beta, calculate_cost_derivative_ridge, 
+                                           learning_rate=regressor_parameters['learning_rate'], 
+                                           max_iterations=regressor_parameters['max_iterations'],
+                                           momentum=regressor_parameters['momentum'],
+                                           batch_size=regressor_parameters['batch_size']
+                                          )
     else:
         raise NotImplementedError('Regressor type not implemented')
 
@@ -143,3 +152,6 @@ def lasso(regressor_parameters, train_data, test_data, n_pol):
 
 def ridge(regressor_parameters, train_data, test_data, n_pol):
     return regressor(RegressorType.RIDGE, regressor_parameters, train_data, test_data, n_pol)
+
+def ridge_sgd(regressor_parameters, train_data, test_data, n_pol):
+    return regressor(RegressorType.RIDGE_SGD, regressor_parameters, train_data, test_data, n_pol)

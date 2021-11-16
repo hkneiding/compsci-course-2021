@@ -14,7 +14,11 @@ def calculate_cost_mse(predictions, targets):
 
 def calculate_cost_derivative_mse(X, Y, beta):
 
-    return (X @ beta.T - Y).T @ X
+    return 1 / len(X) * (X @ beta - Y) @ X
+
+def calculate_cost_derivative_ridge(X, Y, beta):
+
+    return 1 / len(X) * (X @ beta - Y) @ X + 2 * beta
 
 def shuffle(data):
 
@@ -66,15 +70,15 @@ def bootstrap(data, regressor, regressor_parameters, n_pol, n_samples, train_rat
 
     for i in range(n_samples):
 
-        # get a bootstrap sample
-        bootstrap_sample_data = get_bootstrap_sample(data)
-
         # partion into train and test set
-        train_data, test_data = get_train_test_split(bootstrap_sample_data, train_ratio=train_ratio)
+        train_data, test_data = get_train_test_split(data, train_ratio=train_ratio)
+
+        # get a bootstrap sample
+        bootstrap_sample_data_train = get_bootstrap_sample(train_data)
 
         # perform regression and append to output variables
-        train_prediction, test_prediction = regressor(regressor_parameters, train_data, test_data, n_pol)
-        train_losses.append(calculate_cost_mse(train_prediction, train_data['targets']))
+        train_prediction, test_prediction = regressor(regressor_parameters, bootstrap_sample_data_train, test_data, n_pol)
+        train_losses.append(calculate_cost_mse(train_prediction, bootstrap_sample_data_train['targets']))
         test_losses.append(calculate_cost_mse(test_prediction, test_data['targets']))
 
     return train_losses, test_losses
