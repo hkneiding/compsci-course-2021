@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-from src.tools import bootstrap, calculate_cost_mse, cross_validation, get_train_test_split, shuffle
+from src.tools import bootstrap, calculate_cost_mse, cross_validation, get_train_test_split, shuffle, scale_min_max
 from src.franke_function import franke_function, get_xy_grid_data
-from src.regressors import lasso, ols, ols_sgd, regressor, ridge, ridge_sgd
+from src.regressors import lasso, logistic, ols, ols_sgd, regressor, ridge, ridge_sgd
 
 
-def main():
+def main_regression():
 
     # X = np.array([[2,1]])
     # Y = np.array([1.2])
@@ -83,6 +83,52 @@ def main():
     exit()
 
 
+def main_logistic():
+    
+    f = open('wdbc.csv', 'r')
+    lines = f.readlines()
+    f.close()
+
+    features = []
+    labels = []
+    for i in range(len(lines)):
+        line_split = lines[i].split(',')
+
+        if line_split[1] == 'M':
+            labels.append(1)
+        else:
+            labels.append(0)
+
+        features.append(list(map(float, line_split[2:32])))
+    
+    labels = np.array(labels)
+    features = np.array(features)
+
+    data = { 'inputs': [scale_min_max(features[:,i]) for i in range(features.shape[1])], 'targets': labels}
+    data = shuffle(data)
+
+    regressor_parameters = { 'fit_intercept': False, 
+                                'alpha': 0.1,
+                                'learning_rate': 0.005,
+                                'max_iterations': 40000,
+                                'momentum': 0,
+                                'batch_size': 10
+                            }
+
+    train_data, test_data = get_train_test_split(data, train_ratio=0.66)
+    train_prediction, test_prediction = logistic(regressor_parameters, train_data, test_data, 1)
+
+    test_prediction_binary = np.array(test_prediction > 0.5, dtype='int64')
+
+    # print(test_prediction_binary)
+    # print(test_data['targets'])
+    accuracy = 1 - np.sum(np.absolute(test_prediction_binary - test_data['targets']))/len(test_data['targets'])
+
+    print(accuracy)
+
+    exit()
+
 if __name__ == "__main__":
-    main()
+    # main_regression()
+    main_logistic()
     #f_range = 1.22

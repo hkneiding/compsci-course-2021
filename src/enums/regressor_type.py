@@ -12,3 +12,5 @@ class RegressorType(Enum):
     
     RIDGE = auto()
     RIDGE_SGD = auto()
+
+    LOGISTIC = auto()

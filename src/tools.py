@@ -20,6 +20,18 @@ def calculate_cost_derivative_ridge(X, Y, beta):
 
     return 1 / len(X) * (X @ beta - Y) @ X + 2 * beta
 
+def calculate_sigmoid(array_data):
+  return 1/(1 + np.exp(-array_data))
+
+def calculate_cost_derivative_logistic(X, Y, beta):
+  weights_applied =  np.dot(X, beta)
+  prediction = calculate_sigmoid(weights_applied)
+  return 1 / X.shape[0] * (X.T @ (prediction - Y))
+
+def scale_min_max(x):
+
+    return (x - np.min(x)) / (np.max(x) - np.min(x))
+
 def shuffle(data):
 
     # check that dimensions of inputs and targets match

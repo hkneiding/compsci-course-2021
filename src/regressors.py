@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 
 from .enums.regressor_type import RegressorType
 from .sgd import stochastic_gradient_descent
-from .tools import calculate_cost_derivative_mse, calculate_cost_derivative_ridge
+from .tools import calculate_cost_derivative_logistic, calculate_cost_derivative_mse, calculate_cost_derivative_ridge
 
 def calculate_beta(model_matrix, targets):
     return np.linalg.pinv(model_matrix.T @ model_matrix) @ model_matrix.T @ targets
@@ -99,6 +99,14 @@ def get_beta(type, model_matrix, targets, regressor_parameters):
                                            momentum=regressor_parameters['momentum'],
                                            batch_size=regressor_parameters['batch_size']
                                           )
+    elif type == RegressorType.LOGISTIC:
+        beta = np.random.normal(size = model_matrix.shape[1])
+        return stochastic_gradient_descent(model_matrix, targets, beta, calculate_cost_derivative_logistic, 
+                                           learning_rate=regressor_parameters['learning_rate'], 
+                                           max_iterations=regressor_parameters['max_iterations'],
+                                           momentum=regressor_parameters['momentum'],
+                                           batch_size=regressor_parameters['batch_size']
+                                          )
     else:
         raise NotImplementedError('Regressor type not implemented')
 
@@ -155,3 +163,6 @@ def ridge(regressor_parameters, train_data, test_data, n_pol):
 
 def ridge_sgd(regressor_parameters, train_data, test_data, n_pol):
     return regressor(RegressorType.RIDGE_SGD, regressor_parameters, train_data, test_data, n_pol)
+
+def logistic(regressor_parameters, train_data, test_data, n_pol):
+    return regressor(RegressorType.LOGISTIC, regressor_parameters, train_data, test_data, n_pol)
