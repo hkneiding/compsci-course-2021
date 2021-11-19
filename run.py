@@ -1,8 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+from numpy.core.fromnumeric import var
 
-from src.tools import bootstrap, calculate_cost_mse, cross_validation, get_train_test_split, shuffle, scale_min_max
+from src.resampling import bootstrap, cross_validation
+from src.tools import calculate_cost_mse, get_train_test_split, shuffle, scale_min_max
 from src.franke_function import franke_function, get_xy_grid_data
 from src.regressors import lasso, logistic, ols, ols_sgd, regressor, ridge, ridge_sgd
 
@@ -85,6 +87,32 @@ def main_regression():
 
 def main_logistic():
     
+    data = get_wisconsin_data()
+    data = shuffle(data)
+
+    regressor_parameters = { 'fit_intercept': False, 
+                                'alpha': 0.1,
+                                'learning_rate': 0.01,
+                                'max_iterations': 10000,
+                                'momentum': 0.1,
+                                'batch_size': 20
+                            }
+
+    train_data, test_data = get_train_test_split(data, train_ratio=0.66)
+    train_prediction, test_prediction = logistic(regressor_parameters, train_data, test_data, 1)
+
+    test_prediction_binary = np.array(test_prediction > 0.5, dtype='int64')
+
+    # print(test_prediction_binary)
+    # print(test_data['targets'])
+    accuracy = 1 - np.sum(np.absolute(test_prediction_binary - test_data['targets']))/len(test_data['targets'])
+
+    print(accuracy)
+
+    exit()
+
+def get_wisconsin_data():
+    
     f = open('wdbc.csv', 'r')
     lines = f.readlines()
     f.close()
@@ -105,30 +133,40 @@ def main_logistic():
     features = np.array(features)
 
     data = { 'inputs': [scale_min_max(features[:,i]) for i in range(features.shape[1])], 'targets': labels}
+
+    return data
+
+def parameter_scan_wisconsin():
+
+    data = get_wisconsin_data()
     data = shuffle(data)
 
-    regressor_parameters = { 'fit_intercept': False, 
-                                'alpha': 0.1,
-                                'learning_rate': 0.005,
-                                'max_iterations': 40000,
-                                'momentum': 0,
-                                'batch_size': 10
-                            }
+    # parameter to vary
+    x = [5, 6, 7, 8, 9, 10]
+    for i in range(len(x)):
 
-    train_data, test_data = get_train_test_split(data, train_ratio=0.66)
-    train_prediction, test_prediction = logistic(regressor_parameters, train_data, test_data, 1)
 
-    test_prediction_binary = np.array(test_prediction > 0.5, dtype='int64')
+        regressor_parameters = { 'fit_intercept': False, 
+                                    'alpha': 0.1,
+                                    'learning_rate': 0.01,
+                                    'max_iterations': 10000,
+                                    'momentum': 0.1,
+                                    'batch_size': 20
+                                }
 
-    # print(test_prediction_binary)
-    # print(test_data['targets'])
-    accuracy = 1 - np.sum(np.absolute(test_prediction_binary - test_data['targets']))/len(test_data['targets'])
 
-    print(accuracy)
+        train_losses, test_losses = cross_validation(data, regressor=logistic, regressor_parameters=regressor_parameters, n_pol=1, n_folds=x[i])
+        # train_losses, test_losses = bootstrap(data, regressor=logistic, regressor_parameters=regressor_parameters, n_pol=1, n_samples=10)
 
-    exit()
+        print(test_losses)
+        print(var(test_losses))
+
+
+    return 0
+
 
 if __name__ == "__main__":
     # main_regression()
-    main_logistic()
+    # main_logistic()
+    parameter_scan_wisconsin()
     #f_range = 1.22

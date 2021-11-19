@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def calculate_r_squared(predictions, targets):
 
     target_mean = np.mean(targets)
@@ -12,6 +13,9 @@ def calculate_cost_mse(predictions, targets):
 
     return np.mean(np.power(predictions - targets, 2))
 
+def calculate_accuracy(predictions, targets):
+    return 1 - np.sum(np.absolute(predictions - targets))/len(targets)
+
 def calculate_cost_derivative_mse(X, Y, beta):
 
     return 1 / len(X) * (X @ beta - Y) @ X
@@ -21,12 +25,12 @@ def calculate_cost_derivative_ridge(X, Y, beta):
     return 1 / len(X) * (X @ beta - Y) @ X + 2 * beta
 
 def calculate_sigmoid(array_data):
-  return 1/(1 + np.exp(-array_data))
+    return 1/(1 + np.exp(-array_data))
 
 def calculate_cost_derivative_logistic(X, Y, beta):
-  weights_applied =  np.dot(X, beta)
-  prediction = calculate_sigmoid(weights_applied)
-  return 1 / X.shape[0] * (X.T @ (prediction - Y))
+    weights_applied =  np.dot(X, beta)
+    prediction = calculate_sigmoid(weights_applied)
+    return 1 / X.shape[0] * (X.T @ (prediction - Y))
 
 def scale_min_max(x):
 
@@ -66,60 +70,6 @@ def get_train_test_split(data, train_ratio):
                     'targets': data['targets'][train_last_index:]}
 
     return train_split, test_split
-
-def get_bootstrap_sample(data):
-
-    bootstrap_indices = np.random.choice(len(data['targets']) - 1, len(data['targets']))
-    bootstrap_sample_data = { 'inputs': [item[bootstrap_indices] for item in data['inputs']], 'targets': data['targets'][bootstrap_indices] }
-
-    return bootstrap_sample_data
-
-def bootstrap(data, regressor, regressor_parameters, n_pol, n_samples, train_ratio=0.8):
-
-    # lists to store output
-    train_losses = []
-    test_losses = []
-
-    for i in range(n_samples):
-
-        # partion into train and test set
-        train_data, test_data = get_train_test_split(data, train_ratio=train_ratio)
-
-        # get a bootstrap sample
-        bootstrap_sample_data_train = get_bootstrap_sample(train_data)
-
-        # perform regression and append to output variables
-        train_prediction, test_prediction = regressor(regressor_parameters, bootstrap_sample_data_train, test_data, n_pol)
-        train_losses.append(calculate_cost_mse(train_prediction, bootstrap_sample_data_train['targets']))
-        test_losses.append(calculate_cost_mse(test_prediction, test_data['targets']))
-
-    return train_losses, test_losses
-
-def cross_validation(data, regressor, regressor_parameters, n_pol, n_folds):
-
-    # check that data can be partioned into n_folds folds
-    assert len(data['targets']) % n_folds == 0
-    fold_length = len(data['targets']) // n_folds
-
-    # lists to store output
-    train_losses = []
-    test_losses = []
-
-    for i in range(n_folds):
-        
-        # get indices of validation data points for this fold
-        test_indices = list(range(i * fold_length, (i + 1) * fold_length, 1))
-
-        # assign train and test data for this fold
-        test_data = { 'inputs': [item[test_indices] for item in data['inputs']], 'targets': data['targets'][test_indices] }
-        train_data = { 'inputs': [np.delete(item, test_indices) for item in data['inputs']], 'targets': np.delete(data['targets'], test_indices) }
-
-        # perform regression and append to output variables
-        train_prediction, test_prediction = regressor(regressor_parameters, train_data, test_data, n_pol)
-        train_losses.append(calculate_cost_mse(train_prediction, train_data['targets']))
-        test_losses.append(calculate_cost_mse(test_prediction, test_data['targets']))
-
-    return train_losses, test_losses
 
 def get_batches(model_matrix, targets, batch_size):
 
