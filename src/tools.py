@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.core.fromnumeric import size
 
 
 def calculate_r_squared(predictions, targets):
@@ -91,3 +92,26 @@ def get_batches(model_matrix, targets, batch_size):
         targets_batches.append(targets[running_index:running_index + batch_size])
 
     return model_matrix_batches, targets_batches
+
+def get_stochastic_batches(model_matrix, targets, batch_size):
+
+    n_batches = int(np.ceil(len(targets) / batch_size))
+
+    model_matrix_batches = []
+    targets_batches =[]
+    for i in range(n_batches):
+
+        model_matrix_batch, targets_batch = get_stochastic_batch(model_matrix, targets, batch_size)
+
+        model_matrix_batches.append(model_matrix_batch)
+        targets_batches.append(targets_batch)
+
+
+    return model_matrix_batches, targets_batches
+
+
+def get_stochastic_batch(model_matrix, targets, batch_size):
+
+    indices = np.random.randint(low=0, high=len(targets), size=batch_size)
+
+    return model_matrix[indices], targets[indices]

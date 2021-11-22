@@ -3,7 +3,7 @@ import numpy as np
 from scipy.optimize import minimize
 
 from .enums.regressor_type import RegressorType
-from .sgd import stochastic_gradient_descent
+from .sgd import stochastic_gradient_descent, stochastic_batch_gradient_descent
 from .tools import calculate_cost_derivative_logistic, calculate_cost_derivative_mse, calculate_cost_derivative_ridge
 
 def calculate_beta(model_matrix, targets):
@@ -80,12 +80,12 @@ def get_beta(type, model_matrix, targets, regressor_parameters):
     elif type == RegressorType.OLS_SGD:
         # randomly generate first beta
         beta = np.random.normal(size = model_matrix.shape[1])
-        return stochastic_gradient_descent(model_matrix, targets, beta, calculate_cost_derivative_mse, 
-                                           learning_rate=regressor_parameters['learning_rate'], 
-                                           max_iterations=regressor_parameters['max_iterations'],
-                                           momentum=regressor_parameters['momentum'],
-                                           batch_size=regressor_parameters['batch_size']
-                                          )
+        return stochastic_batch_gradient_descent(model_matrix, targets, beta, calculate_cost_derivative_mse, 
+                                                 learning_rate=regressor_parameters['learning_rate'], 
+                                                 max_iterations=regressor_parameters['max_iterations'],
+                                                 momentum=regressor_parameters['momentum'],
+                                                 batch_size=regressor_parameters['batch_size']
+                                                )
     elif type == RegressorType.LASSO:
         return calculate_beta_lasso(model_matrix, targets, alpha=regressor_parameters['alpha'])
     elif type == RegressorType.RIDGE:
@@ -93,20 +93,20 @@ def get_beta(type, model_matrix, targets, regressor_parameters):
     elif type == RegressorType.RIDGE_SGD:
         # randomly generate first beta
         beta = np.random.normal(size = model_matrix.shape[1])
-        return stochastic_gradient_descent(model_matrix, targets, beta, calculate_cost_derivative_ridge, 
-                                           learning_rate=regressor_parameters['learning_rate'], 
-                                           max_iterations=regressor_parameters['max_iterations'],
-                                           momentum=regressor_parameters['momentum'],
-                                           batch_size=regressor_parameters['batch_size']
-                                          )
+        return stochastic_batch_gradient_descent(model_matrix, targets, beta, calculate_cost_derivative_mse, 
+                                                 learning_rate=regressor_parameters['learning_rate'], 
+                                                 max_iterations=regressor_parameters['max_iterations'],
+                                                 momentum=regressor_parameters['momentum'],
+                                                 batch_size=regressor_parameters['batch_size']
+                                                )
     elif type == RegressorType.LOGISTIC:
         beta = np.random.normal(size = model_matrix.shape[1])
-        return stochastic_gradient_descent(model_matrix, targets, beta, calculate_cost_derivative_logistic, 
-                                           learning_rate=regressor_parameters['learning_rate'], 
-                                           max_iterations=regressor_parameters['max_iterations'],
-                                           momentum=regressor_parameters['momentum'],
-                                           batch_size=regressor_parameters['batch_size']
-                                          )
+        return stochastic_batch_gradient_descent(model_matrix, targets, beta, calculate_cost_derivative_mse, 
+                                                 learning_rate=regressor_parameters['learning_rate'], 
+                                                 max_iterations=regressor_parameters['max_iterations'],
+                                                 momentum=regressor_parameters['momentum'],
+                                                 batch_size=regressor_parameters['batch_size']
+                                                )
     else:
         raise NotImplementedError('Regressor type not implemented')
 

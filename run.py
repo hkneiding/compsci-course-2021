@@ -19,7 +19,6 @@ def main_regression():
     # print(stochastic_gradient_descent(X, Y, beta, calculate_cost_derivative_mse, max_iterations=100, momentum=0))
 
 
-
     # np.random.seed(1)
 
     # get grid points
@@ -46,7 +45,7 @@ def main_regression():
                                  'learning_rate': 0.1,
                                  'max_iterations': 1000,
                                  'momentum': 0,
-                                 'batch_size': 100
+                                 'batch_size': 2
                                }
         
         # train_prediction, test_prediction = ols_sgd(regressor_parameters=regressor_parameters, train_data=train_data, test_data=test_data, n_pol=i)
@@ -148,10 +147,10 @@ def parameter_scan_wisconsin():
 
         regressor_parameters = { 'fit_intercept': False, 
                                     'alpha': 0.1,
-                                    'learning_rate': 0.01,
+                                    'learning_rate': 0.1,
                                     'max_iterations': 10000,
                                     'momentum': 0.1,
-                                    'batch_size': 20
+                                    'batch_size': 100
                                 }
 
 
