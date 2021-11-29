@@ -41,11 +41,11 @@ def main_regression():
 
 
         regressor_parameters = { 'fit_intercept': True, 
-                                 'alpha': 0.1,
+                                 'alpha': 0.5,
                                  'learning_rate': 0.1,
-                                 'max_iterations': 1000,
+                                 'max_iterations': 10000,
                                  'momentum': 0,
-                                 'batch_size': 2
+                                 'batch_size': 10
                                }
         
         # train_prediction, test_prediction = ols_sgd(regressor_parameters=regressor_parameters, train_data=train_data, test_data=test_data, n_pol=i)
@@ -57,7 +57,7 @@ def main_regression():
         # pol_test_loss.append(test_loss)
         
         
-        train_losses, test_losses = cross_validation(data, regressor=ridge, regressor_parameters=regressor_parameters, n_pol=i, n_folds=10)
+        train_losses, test_losses = cross_validation(data, regressor=ridge_sgd, regressor_parameters=regressor_parameters, n_pol=i, n_folds=10)
         # train_losses, test_losses = bootstrap(data, regressor=lasso, regressor_parameters=regressor_parameters, n_pol=i, n_samples=30)
 
 
@@ -165,7 +165,7 @@ def parameter_scan_wisconsin():
 
 
 if __name__ == "__main__":
-    # main_regression()
+    main_regression()
     # main_logistic()
-    parameter_scan_wisconsin()
+    # parameter_scan_wisconsin()
     #f_range = 1.22

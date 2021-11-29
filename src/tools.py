@@ -17,21 +17,21 @@ def calculate_cost_mse(predictions, targets):
 def calculate_accuracy(predictions, targets):
     return 1 - np.sum(np.absolute(predictions - targets))/len(targets)
 
-def calculate_cost_derivative_mse(X, Y, beta):
+def calculate_cost_derivative_mse(X, Y, beta, alpha=0):
 
-    return 1 / len(X) * (X @ beta - Y) @ X
+    return 1 / len(X) * (X @ beta - Y) @ X + 2 * alpha * beta
 
-def calculate_cost_derivative_ridge(X, Y, beta):
+def calculate_cost_derivative_ridge(X, Y, beta, alpha):
 
-    return 1 / len(X) * (X @ beta - Y) @ X + 2 * beta
+    return 1 / len(X) * (X @ beta - Y) @ X + 2 * alpha * beta
 
 def calculate_sigmoid(array_data):
     return 1/(1 + np.exp(-array_data))
 
-def calculate_cost_derivative_logistic(X, Y, beta):
+def calculate_cost_derivative_logistic(X, Y, beta, alpha=0):
     weights_applied =  np.dot(X, beta)
     prediction = calculate_sigmoid(weights_applied)
-    return 1 / X.shape[0] * (X.T @ (prediction - Y))
+    return 1 / X.shape[0] * (X.T @ (prediction - Y)) + 2 * alpha * beta
 
 def scale_min_max(x):
 
