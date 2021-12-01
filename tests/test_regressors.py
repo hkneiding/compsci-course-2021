@@ -110,6 +110,11 @@ class TestOls(unittest.TestCase):
         [ { 'fit_intercept': False, 'alpha': 0.5 }, 4 ],
         [ { 'fit_intercept': False, 'alpha': 0.5 }, 5 ],
 
+        [ { 'fit_intercept': False, 'alpha': 0.1 }, 3 ],
+        [ { 'fit_intercept': False, 'alpha': 0.2 }, 3 ],
+        [ { 'fit_intercept': False, 'alpha': 0.3 }, 3 ],
+        [ { 'fit_intercept': False, 'alpha': 0.4 }, 3 ],
+
         [ { 'fit_intercept': True, 'alpha': 0.5 }, 2 ],
         [ { 'fit_intercept': True, 'alpha': 0.5 }, 3 ],
         [ { 'fit_intercept': True, 'alpha': 0.5 }, 4 ],
