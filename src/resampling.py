@@ -1,7 +1,11 @@
+import matplotlib
+from matplotlib.pyplot import axis
 import numpy as np
 
 from .regressors import logistic
 from .tools import get_train_test_split, calculate_accuracy, calculate_cost_mse
+
+matplotlib.rcParams.update({'font.size': 12})
 
 def get_bootstrap_sample(data):
 
@@ -10,16 +14,49 @@ def get_bootstrap_sample(data):
 
     return bootstrap_sample_data
 
+def bias_variance_decomposition(data, regressor, regressor_parameters, n_pol, n_samples, train_ratio=0.8):
+
+    test_predictions = []
+
+    # partion into train and test set
+    train_data, test_data = get_train_test_split(data, train_ratio=train_ratio)
+
+    for i in range(n_samples):
+
+        # get a bootstrap sample
+        bootstrap_sample_data_train = get_bootstrap_sample(train_data)
+
+        # perform regression and append to output variables
+        train_prediction, test_prediction = regressor(regressor_parameters, bootstrap_sample_data_train, test_data, n_pol)
+        
+        test_predictions.append(test_prediction)
+
+    test_predictions = np.array(test_predictions)
+    average_test_predictions = np.mean(test_predictions, axis=0)
+
+    error = calculate_cost_mse(average_test_predictions, test_data['targets'])
+    bias = np.mean( (average_test_predictions - test_data['targets']) ** 2)
+    variance = np.mean(np.var(test_predictions, axis=0))
+    
+    # print(test_data['targets']-average_test_predictions)
+    # print(np.var(average_test_predictions - np.mean(test_data['targets'])))
+    # print(error)
+    # print(bias ** 2)
+    # print(variance)
+    # print(bias ** 2 + variance)
+
+    return error, bias, variance
+
 def bootstrap(data, regressor, regressor_parameters, n_pol, n_samples, train_ratio=0.8):
 
     # lists to store output
     train_losses = []
     test_losses = []
 
-    for i in range(n_samples):
+    # partion into train and test set
+    train_data, test_data = get_train_test_split(data, train_ratio=train_ratio)
 
-        # partion into train and test set
-        train_data, test_data = get_train_test_split(data, train_ratio=train_ratio)
+    for i in range(n_samples):
 
         # get a bootstrap sample
         bootstrap_sample_data_train = get_bootstrap_sample(train_data)

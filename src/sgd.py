@@ -1,7 +1,7 @@
 import numpy as np
 from src.tools import get_batches, get_stochastic_batch, get_stochastic_batches 
 
-def gradient_descent(model_matrix, targets, parameters, derivative, alpha=0, learning_rate=0.001, momentum=0.0, max_iterations=200, convergence=10e-10):
+def gradient_descent(model_matrix, targets, parameters, derivative, alpha=0, learning_rate=0.001, momentum=0.0, max_iterations=200, convergence=10e-4):
 
     step = 0
     for i in range(max_iterations):
@@ -15,7 +15,7 @@ def gradient_descent(model_matrix, targets, parameters, derivative, alpha=0, lea
 
     return parameters
 
-def stochastic_gradient_descent(model_matrix, targets, parameters, derivative, alpha=0, batch_size=32, learning_rate=0.001, momentum=0.0, max_iterations=200, convergence=10e-10):
+def stochastic_gradient_descent(model_matrix, targets, parameters, derivative, alpha=0, batch_size=32, learning_rate=0.001, momentum=0.0, max_iterations=200, convergence=10e-4):
 
     step = 0
     for i in range(max_iterations):
@@ -32,7 +32,7 @@ def stochastic_gradient_descent(model_matrix, targets, parameters, derivative, a
     return parameters
 
 
-def batch_gradient_descent(model_matrix, targets, parameters, derivative, alpha=0, batch_size=32, learning_rate=0.001, momentum=0.0, max_iterations=200, convergence=10e-10):
+def batch_gradient_descent(model_matrix, targets, parameters, derivative, alpha=0, batch_size=32, learning_rate=0.001, momentum=0.0, max_iterations=200, convergence=10e-4):
 
     step = 0
     for i in range(max_iterations):
@@ -51,7 +51,7 @@ def batch_gradient_descent(model_matrix, targets, parameters, derivative, alpha=
 
     return parameters
 
-def stochastic_batch_gradient_descent(model_matrix, targets, parameters, derivative, alpha=0, batch_size=32, learning_rate=0.001, momentum=0.0, max_iterations=200, convergence=10e-10):
+def stochastic_batch_gradient_descent(model_matrix, targets, parameters, derivative, alpha=0, batch_size=32, learning_rate=0.001, momentum=0.0, max_iterations=200, convergence=10e-4):
 
     step = 0
     for i in range(max_iterations):

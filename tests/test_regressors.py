@@ -69,7 +69,9 @@ class TestOls(unittest.TestCase):
         [ { 'fit_intercept': True, 'alpha': 0.5 }, 2 ],
         [ { 'fit_intercept': True, 'alpha': 0.5 }, 3 ],
         [ { 'fit_intercept': True, 'alpha': 0.5 }, 4 ],
-        [ { 'fit_intercept': True, 'alpha': 0.5 }, 5 ]
+        [ { 'fit_intercept': True, 'alpha': 0.5 }, 5 ],
+
+        [ { 'fit_intercept': True, 'alpha': 0.001 }, 5 ]
 
     ])
     def test_ridge(self, regressor_parameters, n_pol):

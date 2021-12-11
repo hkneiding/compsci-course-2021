@@ -108,7 +108,7 @@ def get_beta(type, model_matrix, targets, regressor_parameters):
                                                  max_iterations=regressor_parameters['max_iterations'],
                                                  momentum=regressor_parameters['momentum'],
                                                  batch_size=regressor_parameters['batch_size'],
-                                                 alpha=regressor_parameters['alpha'],
+                                                 alpha=regressor_parameters['alpha']
                                                 )
     else:
         raise NotImplementedError('Regressor type not implemented')
