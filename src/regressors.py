@@ -34,6 +34,12 @@ def center(matrix):
 
 def get_model_matrix(data_points, n_pol, include_intercept=True):
 
+    """Gets a model matrix based on the specified data points and number of polynomial. If include_intercept is false the resulting model matrix will not include a row of 1s.
+
+    Returns:
+        np.array(2d): The model matrix.
+    """
+
     # check that dimensions of features are equal
     for i in range(len(data_points)):
         assert len(data_points[0]) == len(data_points[1])
@@ -75,6 +81,15 @@ def get_model_matrix(data_points, n_pol, include_intercept=True):
 
 def get_beta(type, model_matrix, targets, regressor_parameters):
 
+    """Relay function to distinguish between the different regression types.
+
+    Raises:
+        NotImplementedError: If a unknown regressor is called.
+
+    Returns:
+        np.array: Optimised parameters.
+    """
+
     if type == RegressorType.OLS:
         return calculate_beta(model_matrix, targets)
     elif type == RegressorType.OLS_SGD:
@@ -114,6 +129,13 @@ def get_beta(type, model_matrix, targets, regressor_parameters):
         raise NotImplementedError('Regressor type not implemented')
 
 def regressor(type, regressor_parameters, train_data, test_data, n_pol):
+
+    """General regressor function. Fit_intercept centers the model and trains using the centered model matrix.
+
+    Returns:
+        np.array: The predicitions for the train set.
+        np.array: The predicitions for the test set.
+    """
 
     if regressor_parameters['fit_intercept']:
         # TRAIN

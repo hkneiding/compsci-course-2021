@@ -9,11 +9,9 @@ from sklearn import svm
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import cross_val_score
 
-from mlxtend.evaluate import bias_variance_decomp
-
 from src.resampling import bootstrap, cross_validation, bias_variance_decomposition
 from src.tools import calculate_cost_mse, get_train_test_split, shuffle, scale_min_max
-from src.franke_function import franke_function, get_xy_grid_data
+from src.franke_function import franke_function, get_xy_grid_data, plot_3d
 from src.regressors import lasso, logistic, ols, ols_sgd, regressor, ridge, ridge_sgd
 
 
@@ -43,6 +41,12 @@ def get_wisconsin_data():
     data = { 'inputs': [scale_min_max(features[:,i]) for i in range(features.shape[1])], 'targets': labels}
 
     return data
+
+def plot_franke_function():
+
+    x, y = get_xy_grid_data(0, 1, 25)
+    z = franke_function(x, y, noise_std=0)
+    plot_3d(x, y, z)
 
 def regression_bias_variance_decomposition():
 
@@ -159,6 +163,24 @@ def regression_lambda_scan():
     # plt.legend(loc='upper right')
     plt.show()
 
+def regression_bootstrap():
+
+    np.random.seed(2021)
+
+    # get grid points
+    x, y = get_xy_grid_data(0, 1, 50)
+
+    # full data object
+    data = { 'inputs': [x.flatten(), y.flatten()], 'targets': franke_function(x, y, noise_std=0.1).flatten()}
+    data = shuffle(data)
+
+    regressor_parameters = { 'fit_intercept': True, 'alpha': 1e-6 }
+    train_losses, test_losses = bootstrap(data, regressor=lasso, regressor_parameters=regressor_parameters, n_pol=10, n_samples=100)
+
+    np.set_printoptions(formatter={'float': lambda x: format(x, '6.3E')})
+    print(np.mean(test_losses))
+    print(np.var(test_losses))
+
 def regression_cross_validation():
 
     np.random.seed(2021)
@@ -167,7 +189,7 @@ def regression_cross_validation():
     x, y = get_xy_grid_data(0, 1, 50)
 
     # full data object
-    data = { 'inputs': [x.flatten(), y.flatten()], 'targets': franke_function(x, y, noise_std=0).flatten()}
+    data = { 'inputs': [x.flatten(), y.flatten()], 'targets': franke_function(x, y, noise_std=0.1).flatten()}
     data = shuffle(data)
 
     errors = []
@@ -176,151 +198,50 @@ def regression_cross_validation():
     fold_numbers = [5, 6, 7, 8, 9, 10]
     for fold_number in fold_numbers:
 
-        regressor_parameters = { 'fit_intercept': True, 'alpha': 0 }
-        train_losses, test_losses = cross_validation(data, regressor=ols, regressor_parameters=regressor_parameters, n_pol=10, n_folds=fold_number)
+        regressor_parameters = { 'fit_intercept': True, 'alpha': 1e-6 }
+        train_losses, test_losses = cross_validation(data, regressor=ridge, regressor_parameters=regressor_parameters, n_pol=10, n_folds=fold_number)
         errors.append(np.mean(test_losses))
         variances.append(np.var(test_losses))
 
-    print(errors)
-    plt.figure(figsize=(10, 6))
-    plt.plot(fold_numbers, errors, 'o', label='Test error')
-    # plt.plot(fold_numbers, variances, 'o', label='Variance')
-    # plt.legend(loc='upper right')
-    plt.xlabel('Number of folds')
-    plt.ylabel('Test error')
-    plt.show()
+    np.set_printoptions(formatter={'float': lambda x: format(x, '6.3E')})
+    print(np.array(errors))
+    print(np.array(variances))
 
-def regression_bias_variance_decomposition_mlxtend():
+def regression_comparison():
+
+    np.random.seed(2021)
 
     # get grid points
     x, y = get_xy_grid_data(0, 1, 50)
 
-    # full data object
-    data = { 'inputs': [x.flatten(), y.flatten()], 'targets': franke_function(x, y, noise_std=0).flatten()}
-    data = shuffle(data)
+    ols_errors = []
+    ridge_errors = []
+    lasso_errors = []
 
-    train_data, test_data = get_train_test_split(data, train_ratio=0.8)
+    regressor_parameters = { 'fit_intercept': True, 'alpha': 1e-4 }
+    noises = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+    for noise in noises:
 
-    model = LinearRegression()
-    mse, bias, var = bias_variance_decomp(model, 
-                                        X_train=np.array(train_data['inputs']).T, 
-                                        y_train=train_data['targets'],
-                                        X_test=np.array(test_data['inputs']).T,
-                                        y_test=test_data['targets'],
-                                        loss='mse',
-                                        num_rounds=1000)
+        # full data object
+        data = { 'inputs': [x.flatten(), y.flatten()], 'targets': franke_function(x, y, noise_std=noise).flatten()}
+        data = shuffle(data)
 
-    print(mse)
-    print(bias)
-    print(var)
-
-def main_regression():
-
-    # X = np.array([[2,1]])
-    # Y = np.array([1.2])
-    # beta = np.array([[1,1]])
-
-    # print(gradient_descent(X, Y, beta, calculate_cost_derivative_mse, max_iterations=100, momentum=0))
-    # print(stochastic_gradient_descent(X, Y, beta, calculate_cost_derivative_mse, max_iterations=100, momentum=0))
-
-
-    # np.random.seed(1)
-
-    # get grid points
-    x, y = get_xy_grid_data(0, 1, 50)
-
-    # full data object
-    data = { 'inputs': [x.flatten(), y.flatten()], 'targets': franke_function(x, y, noise_std=0).flatten()}
-    data = shuffle(data)
-    train_data, test_data = get_train_test_split(data, 0.9)
-
-    for i in range(1,6,1):
-        regressor_parameters = { 'fit_intercept': True, 'alpha': 0.0001 }
-        
-        train_pred, test_pred = lasso(regressor_parameters, train_data, test_data, n_pol=i)
-        print(calculate_cost_mse(test_pred, test_data['targets']))
-
-    exit()
-
-    pol_train_loss = []
-    pol_test_loss = []
-    n_pols=[i for i in range(1, 6, 1)]
-    for i in n_pols:
-
-        # alpha is only needed for LASSO or ridge where you need additional hyperparameter to 
-        # control how much the magnitude of the parameter vector should be penalised
-        regressor_parameters = { 'fit_intercept': True, 'alpha': 0.5 }
-
-
-        regressor_parameters = { 'fit_intercept': True, 
-                                 'alpha': 0.5,
-                                 'learning_rate': 0.1,
-                                 'max_iterations': 10000,
-                                 'momentum': 0,
-                                 'batch_size': 10
-                               }
-        
-        # train_prediction, test_prediction = ols_sgd(regressor_parameters=regressor_parameters, train_data=train_data, test_data=test_data, n_pol=i)
-
-        # train_loss = calculate_cost_mse(train_prediction, train_data['targets'])
-        # test_loss = calculate_cost_mse(test_prediction, test_data['targets'])
-
-        # pol_train_loss.append(train_loss)
-        # pol_test_loss.append(test_loss)
-        
-        
-        train_losses, test_losses = cross_validation(data, regressor=ols, regressor_parameters=regressor_parameters, n_pol=i, n_folds=10)
-        # train_losses, test_losses = bootstrap(data, regressor=lasso, regressor_parameters=regressor_parameters, n_pol=i, n_samples=30)
-
-
-        pol_train_loss.append(np.mean(train_losses))
-        pol_test_loss.append(np.mean(test_losses))
-
-        # print('Polynom order ' + str(i))
-        # print('Train Mean:     %.2e' % np.mean(train_losses))
-        # print('Train Variance: %.2e' % np.var(train_losses))
-        # print('Test Mean:      %.2e' % np.mean(test_losses))
-        # print('Test Variance:  %.2e' % np.var(test_losses))
-        # print()
-
-
-    print(pol_train_loss)
-    plt.plot(n_pols, pol_train_loss, label='Train error')
-    plt.plot(n_pols, pol_test_loss, label='Test error')
-    plt.legend(loc='upper right')
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-    plt.ylabel('Cost')
-    plt.xlabel('Polynomial order')
-    plt.show()
-
-    exit()
-
-
-def main_logistic():
+        # get test losses for all regression types
+        train_losses, test_losses = cross_validation(data, regressor=ols, regressor_parameters=regressor_parameters, n_pol=10, n_folds=6)
+        ols_errors.append(np.mean(test_losses))
+        train_losses, test_losses = cross_validation(data, regressor=ridge, regressor_parameters=regressor_parameters, n_pol=10, n_folds=6)
+        ridge_errors.append(np.mean(test_losses))
+        train_losses, test_losses = cross_validation(data, regressor=lasso, regressor_parameters=regressor_parameters, n_pol=10, n_folds=6)
+        lasso_errors.append(np.mean(test_losses))
     
-    data = get_wisconsin_data()
-    data = shuffle(data)
-
-    regressor_parameters = { 'fit_intercept': False, 
-                                'alpha': 0.1,
-                                'learning_rate': 0.01,
-                                'max_iterations': 10000,
-                                'momentum': 0.1,
-                                'batch_size': 20
-                            }
-
-    train_data, test_data = get_train_test_split(data, train_ratio=0.66)
-    train_prediction, test_prediction = logistic(regressor_parameters, train_data, test_data, 1)
-
-    test_prediction_binary = np.array(test_prediction > 0.5, dtype='int64')
-
-    # print(test_prediction_binary)
-    # print(test_data['targets'])
-    accuracy = 1 - np.sum(np.absolute(test_prediction_binary - test_data['targets']))/len(test_data['targets'])
-
-    print(accuracy)
-
-    exit()
+    # plot comparison
+    plt.figure(figsize=(10, 6))
+    plt.plot(noises, ols_errors, 'o', label='scikit-learn')
+    plt.plot(noises, ridge_errors, 'o', label='scikit-learn')
+    plt.plot(noises, lasso_errors, 'o', label='scikit-learn')
+    plt.xlabel('Noise')
+    plt.ylabel('Test MSE')
+    plt.show()
 
 def logistic_lr_scan():
 
@@ -533,21 +454,26 @@ def svm_scikit_poly_scan():
 
 if __name__ == "__main__":
 
-    # # regression
+    # - - - plot - - - #
+    # plot_franke_function()
+
+    # - - - regression - - - #
     # regression_bias_variance_decomposition()
     # regression_bias_variance_decomposition_mlxtend()
-    regression_bias_variance_decomposition_model_data_points()
-    regression_bias_variance_decomposition_model_complexity()
+    # regression_bias_variance_decomposition_model_data_points()
+    # regression_bias_variance_decomposition_model_complexity()
     # regression_cross_validation()
+    # regression_bootstrap()
     # regression_lambda_scan()
+    regression_comparison()
 
-    # # logistic regression
+    # - - - logistic regression - - - #
     # logistic_lr_scan()
     # logistic_momentum_scan()
     # logistic_alpha_scan()
     # logistic_scikit_compare()
 
-    # # support vector machines
+    # - - - support vector machines - - - #
     # svm_scikit()
     # svm_scikit_c_scan()
     # svm_scikit_poly_scan()

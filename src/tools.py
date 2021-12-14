@@ -39,6 +39,12 @@ def scale_min_max(x):
 
 def shuffle(data):
 
+    """Shuffles a data dict.
+
+    Returns:
+        dict: The shuffled data dict.
+    """
+
     # check that dimensions of inputs and targets match
     for i in range(len(data['inputs'])):
         assert len(data['inputs'][i]) == len(data['targets'])
@@ -51,6 +57,13 @@ def shuffle(data):
     return data
 
 def get_train_test_split(data, train_ratio):
+
+    """Splits data dict into train and test partitions.
+
+    Returns:
+        dict: The train data dict.
+        dict: The test data dict.
+    """
 
     # check that ration r is between 0 an 1
     assert train_ratio >= 0 and train_ratio <= 1
@@ -74,6 +87,13 @@ def get_train_test_split(data, train_ratio):
 
 def get_batches(model_matrix, targets, batch_size):
 
+    """Gets batches of the specified size deterministically. Last batch might be shortened.
+
+    Returns:
+        np.array: Array of model matrix batches.
+        np.array: Array of target value batches.
+    """
+
     # shuffle data
     perm = np.random.permutation(len(targets))
 
@@ -95,6 +115,13 @@ def get_batches(model_matrix, targets, batch_size):
 
 def get_stochastic_batches(model_matrix, targets, batch_size):
 
+    """Gets batches of the specified size by sampling with replacement. Last batch might be shortened.
+
+    Returns:
+        np.array: Array of model matrix batches.
+        np.array: Array of target value batches.
+    """
+
     n_batches = int(np.ceil(len(targets) / batch_size))
 
     model_matrix_batches = []
@@ -111,6 +138,13 @@ def get_stochastic_batches(model_matrix, targets, batch_size):
 
 
 def get_stochastic_batch(model_matrix, targets, batch_size):
+
+    """Samples a stochastic batch from model matrix with replacement.
+
+    Returns:
+        np.array: The stochastic batch of model matrix entries.
+        np.array: The corresponding batch of target values.
+    """
 
     indices = np.random.randint(low=0, high=len(targets), size=batch_size)
 

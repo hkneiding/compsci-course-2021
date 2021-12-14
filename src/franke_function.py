@@ -40,7 +40,7 @@ def franke_function(x, y, noise_mean=0, noise_std=0):
 
 def plot_3d(x, y, z):
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(10, 6))
     ax = fig.gca(projection='3d')
 
     # Plot the surface.
@@ -51,6 +51,10 @@ def plot_3d(x, y, z):
     ax.set_zlim(-0.10, 1.40)
     ax.zaxis.set_major_locator(LinearLocator(10))
     ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
 
     # Add a color bar which maps values to colors.
     fig.colorbar(surf, shrink=0.5, aspect=5)
