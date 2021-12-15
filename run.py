@@ -13,8 +13,6 @@ from src.resampling import bootstrap, cross_validation, bias_variance_decomposit
 from src.tools import calculate_cost_mse, get_train_test_split, shuffle, scale_min_max
 from src.franke_function import franke_function, get_xy_grid_data, plot_3d
 from src.regressors import lasso, logistic, ols, ols_sgd, regressor, ridge, ridge_sgd
-from src.ridge_analysis import find_lambda_ridge, find_lambda_ridge_skl, plot_mse_lambdas, search_learning_rate, grid_search_learning_rate_regularization, sklearn_analysis_sgd, sklearn_grid_search
-
 
 def get_wisconsin_data():
     
@@ -219,8 +217,8 @@ def regression_comparison():
     ridge_errors = []
     lasso_errors = []
 
-    regressor_parameters = { 'fit_intercept': True, 'alpha': 1e-4 }
-    noises = [0, 0.1, 0.2, 0.3, 0.4, 0.5]
+
+    noises = [0]
     for noise in noises:
 
         # full data object
@@ -228,18 +226,24 @@ def regression_comparison():
         data = shuffle(data)
 
         # get test losses for all regression types
+        regressor_parameters = { 'fit_intercept': True, 'alpha': 0 }
         train_losses, test_losses = cross_validation(data, regressor=ols, regressor_parameters=regressor_parameters, n_pol=10, n_folds=6)
         ols_errors.append(np.mean(test_losses))
+        regressor_parameters = { 'fit_intercept': True, 'alpha': 1e-6 }
         train_losses, test_losses = cross_validation(data, regressor=ridge, regressor_parameters=regressor_parameters, n_pol=10, n_folds=6)
         ridge_errors.append(np.mean(test_losses))
+        regressor_parameters = { 'fit_intercept': True, 'alpha': 1e-5 }
         train_losses, test_losses = cross_validation(data, regressor=lasso, regressor_parameters=regressor_parameters, n_pol=10, n_folds=6)
         lasso_errors.append(np.mean(test_losses))
     
     # plot comparison
-    plt.figure(figsize=(10, 6))
-    plt.plot(noises, ols_errors, 'o', label='scikit-learn')
-    plt.plot(noises, ridge_errors, 'o', label='scikit-learn')
-    plt.plot(noises, lasso_errors, 'o', label='scikit-learn')
+    plt.figure(figsize=(10, 10))
+    plt.rcParams.update({'font.size': 16})
+    plt.plot(noises, ols_errors, 'o', label='OLS', markersize=40)
+    plt.plot(noises, ridge_errors, 'o', label='Ridge', markersize=40)
+    plt.plot(noises, lasso_errors, 'o', label='LASSO', markersize=40)
+    # plt.xticks(range(min(noises), math.ceil(max(noises))+1))
+    plt.legend(loc='best', markerscale=.25)
     plt.xlabel('Noise')
     plt.ylabel('Test MSE')
     plt.show()
@@ -478,13 +482,3 @@ if __name__ == "__main__":
     # svm_scikit()
     # svm_scikit_c_scan()
     # svm_scikit_poly_scan()
-
-    # - - - ridge regression - - - #
-    # search_learning_rate(alpha=0.1)
-    # sklearn_analysis_sgd(type="ridge")
-    # sklearn_grid_search()
-    # grid_search_learning_rate_regularization()
-    # find_lambda_ridge()
-    # find_lambda_ridge_skl()
-    # plot_mse_lambdas()
-
