@@ -13,6 +13,7 @@ from src.resampling import bootstrap, cross_validation, bias_variance_decomposit
 from src.tools import calculate_cost_mse, get_train_test_split, shuffle, scale_min_max
 from src.franke_function import franke_function, get_xy_grid_data, plot_3d
 from src.regressors import lasso, logistic, ols, ols_sgd, regressor, ridge, ridge_sgd
+from src.ridge_analysis import find_lambda_ridge, find_lambda_ridge_skl, plot_mse_lambdas, search_learning_rate, grid_search_learning_rate_regularization, sklearn_analysis_sgd, sklearn_grid_search
 
 
 def get_wisconsin_data():
@@ -477,3 +478,13 @@ if __name__ == "__main__":
     # svm_scikit()
     # svm_scikit_c_scan()
     # svm_scikit_poly_scan()
+
+    # - - - ridge regression - - - #
+    # search_learning_rate(alpha=0.1)
+    # sklearn_analysis_sgd(type="ridge")
+    # sklearn_grid_search()
+    # grid_search_learning_rate_regularization()
+    # find_lambda_ridge()
+    # find_lambda_ridge_skl()
+    # plot_mse_lambdas()
+
