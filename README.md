@@ -1,4 +1,4 @@
-# compsci-course-2021
+# CompSci Course 2021 - Project 1: Regression, Classification and Resampling Methods
 
 Repository for the first project in the CompSci PhD program.
 
